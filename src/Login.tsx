@@ -5,10 +5,18 @@ import ofiLogo from './images/Login/Aeropuerto.jpg';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  
+  // Definir el tipo de role como número
+  const role: number = 2; // Cambia este valor a 1 para simular el rol de Admin
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    navigate("/admin/roles");
+    
+    if (role === 1) {
+      navigate("/admin/roles"); // Redirige a la página de roles para Admin
+    } else if (role === 2) {
+      navigate("/pasajeros"); // Redirige a la página de pasajeros para Secretario
+    }
   };
 
   return (
