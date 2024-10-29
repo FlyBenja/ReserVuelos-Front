@@ -2,6 +2,7 @@ import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import 'sweetalert2/src/sweetalert2.scss';
+import { useNavigate } from 'react-router-dom';
 
 interface Reservation {
   id: number;
@@ -10,6 +11,7 @@ interface Reservation {
   seat: string;
   flightNumber: string;
   flightClass: string;
+  isActive: boolean;
 }
 
 const CrearReservación: React.FC = () => {
@@ -20,9 +22,10 @@ const CrearReservación: React.FC = () => {
   const [newSeat, setNewSeat] = useState('');
   const [newFlightNumber, setNewFlightNumber] = useState('');
   const [selectedFlightClass, setSelectedFlightClass] = useState('');
+  const navigate = useNavigate();
 
-  const availableCodes = ['ABC123', 'DEF456', 'GHI789', 'JKL012', 'MNO345']; // Códigos de reserva disponibles
-  const flightClasses = ['Económica', 'Ejecutiva', 'Primera Clase']; // Opciones de clase de vuelo
+  const availableCodes = ['ABC123', 'DEF456', 'GHI789', 'JKL012', 'MNO345'];
+  const flightClasses = ['Económica', 'Ejecutiva', 'Primera Clase'];
 
   // Función para crear una nueva reservación
   const handleCreate = () => {
@@ -34,6 +37,7 @@ const CrearReservación: React.FC = () => {
         seat: newSeat,
         flightNumber: newFlightNumber,
         flightClass: selectedFlightClass,
+        isActive: true,
       };
       setReservations((prevReservations) => [...prevReservations, newReservation]);
 
@@ -74,11 +78,27 @@ const CrearReservación: React.FC = () => {
     });
   };
 
+  // Función para activar/desactivar una reservación
+  const toggleReservationStatus = (id: number) => {
+    setReservations((prevReservations) =>
+      prevReservations.map((reservation) =>
+        reservation.id === id ? { ...reservation, isActive: !reservation.isActive } : reservation
+      )
+    );
+    const currentStatus = reservations.find((reservation) => reservation.id === id)?.isActive;
+    Swal.fire({
+      icon: currentStatus ? 'info' : 'success',
+      title: currentStatus ? 'Desactivada' : 'Activada',
+      text: `La reservación ha sido ${currentStatus ? 'desactivada' : 'activada'}`,
+      timer: 2000,
+      showConfirmButton: false,
+    });
+  };
+
   return (
     <>
       <Breadcrumb pageName="Crear Reservación" />
 
-      {/* Botón para abrir el modal de crear */}
       <div className="flex justify-end mb-4">
         <button
           onClick={() => setShowCreateModal(true)}
@@ -88,21 +108,39 @@ const CrearReservación: React.FC = () => {
         </button>
       </div>
 
-      {/* Listado de reservaciones en cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 p-4">
         {reservations.map((reservation) => (
           <div key={reservation.id} className="bg-white shadow-lg rounded-lg p-6 flex flex-col justify-between border border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Pasaporte: {reservation.passport}</h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xl font-semibold text-gray-800">Pasaporte: {reservation.passport}</h3>
+              <button
+                onClick={() => navigate('/pasajeros/info-reservas', { state: { reservation } })}
+                className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold py-1 px-2 rounded-lg shadow-md"
+              >
+                Ver
+              </button>
+            </div>
             <p className="text-gray-600 mb-2">Asiento: {reservation.seat}</p>
             <p className="text-gray-600 mb-2">Número de Vuelo: {reservation.flightNumber}</p>
             <p className="text-gray-600 mb-2">Clase de Vuelo: {reservation.flightClass}</p>
             <p className="text-gray-600 mb-4">Código de Reserva: {reservation.code}</p>
-            <button
-              onClick={() => handleDelete(reservation.id)}
-              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
-            >
-              Eliminar
-            </button>
+            <p className="text-gray-600 mb-4">Estado: {reservation.isActive ? 'Activa' : 'Inactiva'}</p>
+            <div className="flex justify-between">
+              <button
+                onClick={() => toggleReservationStatus(reservation.id)}
+                className={`font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105 ${
+                  reservation.isActive ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
+                } text-white`}
+              >
+                {reservation.isActive ? 'Desactivar' : 'Activar'}
+              </button>
+              <button
+                onClick={() => handleDelete(reservation.id)}
+                className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
+              >
+                Eliminar
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -112,8 +150,6 @@ const CrearReservación: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-lg w-96 border border-gray-300">
             <h2 className="text-2xl font-semibold mb-4">Crear Nueva Reservación</h2>
-
-            {/* Seleccionador de código de reserva */}
             <select
               value={selectedCode}
               onChange={(e) => setSelectedCode(e.target.value)}
@@ -124,7 +160,6 @@ const CrearReservación: React.FC = () => {
                 <option key={code} value={code}>{code}</option>
               ))}
             </select>
-
             <input
               type="text"
               value={newPassport}
@@ -146,8 +181,6 @@ const CrearReservación: React.FC = () => {
               placeholder="Número de Vuelo"
               className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-
-            {/* Seleccionador de clase de vuelo */}
             <select
               value={selectedFlightClass}
               onChange={(e) => setSelectedFlightClass(e.target.value)}
@@ -158,7 +191,6 @@ const CrearReservación: React.FC = () => {
                 <option key={flightClass} value={flightClass}>{flightClass}</option>
               ))}
             </select>
-
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setShowCreateModal(false)}
