@@ -1,14 +1,13 @@
 import React, { useState, ReactNode } from 'react';
 import Header from '../components/Header/index';
 import SidebarAdmin from '../components/Sidebar/Admin';
-import SidebarSecretario from '../components/Sidebar/Pasajero/index';
+import SidebarPasajero from '../components/Sidebar/Pasajero/index';
 
 const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Definimos el rol aquí
-  const role: number = 2; // 1 para Admin, 2 para Secretario
-
+  const role: number = 2; // 1 para Admin, 2 para pasajero
   return (
     <div className="dark:bg-boxdark-2 dark:text-bodydark">
       {/* <!-- ===== Page Wrapper Start ===== --> */}
@@ -17,7 +16,7 @@ const DefaultLayout: React.FC<{ children: ReactNode }> = ({ children }) => {
         {role === 1 ? (
           <SidebarAdmin sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         ) : role === 2 ? (
-          <SidebarSecretario sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+          <SidebarPasajero sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         ) : null}
         {/* <!-- ===== Sidebar End ===== --> */}
         

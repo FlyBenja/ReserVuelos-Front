@@ -15,7 +15,7 @@ const Login: React.FC = () => {
     if (role === 1) {
       navigate("/admin/roles"); // Redirige a la página de roles para Admin
     } else if (role === 2) {
-      navigate("/pasajeros"); // Redirige a la página de pasajeros para Secretario
+      navigate("/pasajeros/reservas"); // Redirige a la página de pasajeros para Secretario
     }
   };
 
