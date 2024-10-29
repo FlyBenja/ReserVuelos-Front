@@ -104,7 +104,7 @@ const Pasajeros: React.FC = () => {
 
   return (
     <>
-      <Breadcrumb pageName="Pasajeros" />
+      <Breadcrumb pageName="Listar Pasajeros" />
       <div className="mx-auto max-w-5xl px-1 py-1">
 
         {/* Campo de búsqueda por nombre */}

@@ -134,7 +134,7 @@ const Reservaciones: React.FC = () => {
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xl font-semibold text-gray-800">Código: {reservation.code}</h3>
               <button
-                onClick={() => navigate('/admin/pasajeros')} // Usando useNavigate
+                onClick={() => navigate('/admin/listar-pasajeros')} // Usando useNavigate
                 className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold py-1 px-2 rounded-lg shadow-md"
               >
                 Ver

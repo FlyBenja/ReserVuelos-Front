@@ -28,7 +28,7 @@ function App() {
         <Route path="roles" element={<Roles />} />
         <Route path="Clase-de-Vuelo" element={<ClasesVuelo />} />
         <Route path="Reservaciones" element={<Reservaciones />} />
-        <Route path="Pasajeros" element={<Pasajeros />} />
+        <Route path="listar-Pasajeros" element={<Pasajeros />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<Settings />} />
       </Routes>
