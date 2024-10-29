@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { FaEnvelope, FaLock } from "react-icons/fa";
-import umgLogo from './images/Login/logo3.png';
-import ofiLogo from './images/Login/sistemas1_11zon.png';
+import umgLogo from './images/Login/Avion.png';
+import ofiLogo from './images/Login/Aeropuerto.jpg';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ const Login: React.FC = () => {
       <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
         <div className="mb-4 text-center">
           <img src={umgLogo} alt="UMG Logo" className="w-24 mx-auto" />
-          <h1 className="my-3 text-xl font-semibold text-gray-700">Gestor de tesis</h1>
+          <h1 className="my-3 text-xl font-semibold text-gray-700">Inicio de Sesion</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-1">
