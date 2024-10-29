@@ -138,6 +138,33 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
               </li>
               {/* Menu Item Clases de Vuelo */}
 
+              {/* Menu Item Reservaciones */}
+              <li>
+                <NavLink
+                  to="/admin/Reservaciones"
+                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${pathname === '/admin/Reservaciones' &&
+                    'bg-graydark dark:bg-meta-4'
+                    }`}
+                  onClick={() => setSidebarOpen(false)} // Cerrar sidebar
+                >
+                  <svg
+                    className="fill-current"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M19 3H18V1H16V3H8V1H6V3H5C3.9 3 3 3.9 3 5V21C3 22.1 3.9 23 5 23H19C20.1 23 21 22.1 21 21V5C21 3.9 20.1 3 19 3ZM19 21H5V10H19V21ZM19 8H5V5H19V8Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  Reservaciones
+                </NavLink>
+              </li>
+              {/* Menu Item Reservaciones */}
+
             </ul>
           </div>
         </nav>
