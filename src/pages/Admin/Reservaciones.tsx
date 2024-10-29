@@ -130,9 +130,17 @@ const Reservaciones: React.FC = () => {
         {reservations.map((reservation) => (
           <div key={reservation.id} className="bg-white shadow-lg rounded-lg p-6 flex flex-col justify-between border border-gray-200">
             <h3 className="text-xl font-semibold text-gray-800 mb-2">Código: {reservation.code}</h3>
-            <p className="text-gray-600">Inicio: {reservation.startDate}</p>
-            <p className="text-gray-600">Final: {reservation.endDate}</p>
-            <div className="mt-4 flex space-x-4">
+            <div className="flex space-x-4">
+              <div className="w-1/2">
+                <p className="text-gray-600 font-semibold mb-1">Fecha Inicio</p>
+                <p className="text-gray-600">{reservation.startDate}</p>
+              </div>
+              <div className="w-1/2">
+                <p className="text-gray-600 font-semibold mb-1">Fecha Final</p>
+                <p className="text-gray-600">{reservation.endDate}</p>
+              </div>
+            </div>
+            <div className="mt-4 flex space-x-4 justify-center">
               <button
                 onClick={() => openUpdateModal(reservation.id)}
                 className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
@@ -166,20 +174,24 @@ const Reservaciones: React.FC = () => {
             />
             {/* Contenedor para las fechas en la misma línea */}
             <div className="flex space-x-4">
-              <input
-                type="date"
-                value={newStartDate}
-                onChange={(e) => setNewStartDate(e.target.value)}
-                placeholder="Fecha de Inicio"
-                className="w-1/2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <input
-                type="date"
-                value={newEndDate}
-                onChange={(e) => setNewEndDate(e.target.value)}
-                placeholder="Fecha de Finalización"
-                className="w-1/2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <div className="w-1/2">
+                <label className="block text-gray-700 font-semibold mb-1">Fecha de Inicio</label>
+                <input
+                  type="date"
+                  value={newStartDate}
+                  onChange={(e) => setNewStartDate(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+              <div className="w-1/2">
+                <label className="block text-gray-700 font-semibold mb-1">Fecha de Finalización</label>
+                <input
+                  type="date"
+                  value={newEndDate}
+                  onChange={(e) => setNewEndDate(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
             </div>
             <div className="flex justify-end space-x-2 mt-4">
               <button
@@ -193,9 +205,8 @@ const Reservaciones: React.FC = () => {
               </button>
               <button
                 onClick={showCreateModal ? handleCreate : handleUpdate}
-                className={`${
-                  showCreateModal ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'
-                } text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105`}
+                className={`${showCreateModal ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'
+                  } text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105`}
               >
                 {showCreateModal ? 'Crear' : 'Actualizar'}
               </button>
