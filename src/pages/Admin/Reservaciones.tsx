@@ -2,6 +2,7 @@ import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import 'sweetalert2/src/sweetalert2.scss';
+import { useNavigate } from 'react-router-dom'; // Importa useNavigate
 
 interface Reservation {
   id: number;
@@ -11,6 +12,7 @@ interface Reservation {
 }
 
 const Reservaciones: React.FC = () => {
+  const navigate = useNavigate(); // Inicializa useNavigate
   const [reservations, setReservations] = useState<Reservation[]>([
     { id: 1, code: 'ABC123', startDate: '2024-11-01', endDate: '2024-11-05' },
     { id: 2, code: 'DEF456', startDate: '2024-12-01', endDate: '2024-12-05' },
@@ -129,7 +131,15 @@ const Reservaciones: React.FC = () => {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 p-4">
         {reservations.map((reservation) => (
           <div key={reservation.id} className="bg-white shadow-lg rounded-lg p-6 flex flex-col justify-between border border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Código: {reservation.code}</h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-xl font-semibold text-gray-800">Código: {reservation.code}</h3>
+              <button
+                onClick={() => navigate('/admin/pasajeros')} // Usando useNavigate
+                className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold py-1 px-2 rounded-lg shadow-md"
+              >
+                Ver
+              </button>
+            </div>
             <div className="flex space-x-4">
               <div className="w-1/2">
                 <p className="text-gray-600 font-semibold mb-1">Fecha Inicio</p>
