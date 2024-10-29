@@ -84,7 +84,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
 
             <ul className="mb-6 flex flex-col gap-1.5">
 
-              {/* Menu Item Calendar */}
+              {/* Menu Item Roles */}
               <li>
                 <NavLink
                   to="/admin/roles"
@@ -109,7 +109,35 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }: SidebarProps) => {
                   Roles
                 </NavLink>
               </li>
-              {/* Menu Item Calendar */}
+              {/* Menu Item Roles */}
+
+              {/* Menu Item Clases de Vuelo */}
+              <li>
+                <NavLink
+                  to="/admin/Clase-de-Vuelo"
+                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${pathname === '/admin/Clase-de-Vuelo' &&
+                    'bg-graydark dark:bg-meta-4'
+                    }`}
+                  onClick={() => setSidebarOpen(false)} // Cerrar sidebar
+                >
+                  <svg
+                    className="fill-current"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M21 16V14L13 10V3.5C13 2.67 12.33 2 11.5 2S10 2.67 10 3.5V10L2 14V16L10 12V19L8 21V22H16V21L14 19V12L21 16Z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  Clases de Vuelo
+                </NavLink>
+              </li>
+              {/* Menu Item Clases de Vuelo */}
+
             </ul>
           </div>
         </nav>

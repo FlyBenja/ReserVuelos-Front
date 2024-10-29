@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import Breadcrumb from '../../../components/Breadcrumbs/Breadcrumb';
-import userSix from '../../../images/user/user-06.png'; // Imagen por defecto
-import ofiLogo from '../../../images/Login/Aeropuerto.jpg';
+import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
+import userSix from '../../images/user/user-06.png'; // Imagen por defecto
+import ofiLogo from '../../images/Login/Aeropuerto.jpg';
 import { FaCamera } from 'react-icons/fa'; // Ícono de la cámara
 
 const Profile = () => {
