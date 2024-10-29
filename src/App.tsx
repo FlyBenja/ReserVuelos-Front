@@ -4,7 +4,8 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import Roles from './pages/Admin/Roles';
 import ClasesVuelo from './pages/Admin/ClasesVuelo';
 import Reservaciones from './pages/Admin/Reservaciones';
-import Pasajeros from './pages/Admin/ListaPasajeros';
+import ListarPasajeros from './pages/Admin/ListaPasajeros';
+import InfoPasajeros from './pages/Admin/InfoPasajeros';
 import Profile from './pages/DatosPerfil/Profile';
 import Settings from './pages/DatosPerfil/Settings';
 import DefaultLayout from './layout/DefaultLayout';
@@ -28,7 +29,8 @@ function App() {
         <Route path="roles" element={<Roles />} />
         <Route path="Clase-de-Vuelo" element={<ClasesVuelo />} />
         <Route path="Reservaciones" element={<Reservaciones />} />
-        <Route path="listar-Pasajeros" element={<Pasajeros />} />
+        <Route path="listar-Pasajeros" element={<ListarPasajeros />} />
+        <Route path="info-Pasajero" element={<InfoPasajeros />} />
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<Settings />} />
       </Routes>
