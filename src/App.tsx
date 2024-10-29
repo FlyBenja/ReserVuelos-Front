@@ -4,7 +4,7 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import Roles from './pages/Admin/Roles';
 import ClasesVuelo from './pages/Admin/ClasesVuelo';
 import Reservaciones from './pages/Admin/Reservaciones';
-import Pasajeros from './pages/Admin/Pasajeros';
+import Pasajeros from './pages/Admin/ListaPasajeros';
 import Profile from './pages/DatosPerfil/Profile';
 import Settings from './pages/DatosPerfil/Settings';
 import DefaultLayout from './layout/DefaultLayout';
