@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 import umgLogo from './images/Login/Avion.png';
 import ofiLogo from './images/Login/Aeropuerto.jpg';
@@ -6,7 +6,6 @@ import ofiLogo from './images/Login/Aeropuerto.jpg';
 const Login: React.FC = () => {
   const navigate = useNavigate();
   
-  // Definir el tipo de role como número
   const role: number = 2; // Cambia este valor a 1 para simular el rol de Admin
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -24,7 +23,7 @@ const Login: React.FC = () => {
       <div className="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
         <div className="mb-4 text-center">
           <img src={umgLogo} alt="UMG Logo" className="w-24 mx-auto" />
-          <h1 className="my-3 text-xl font-semibold text-gray-700">Inicio de Sesion</h1>
+          <h1 className="my-3 text-xl font-semibold text-gray-700">Inicio de Sesión</h1>
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-1">
@@ -57,6 +56,10 @@ const Login: React.FC = () => {
           </div>
           <button type="submit" className="w-full py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">Ingresar</button>
         </form>
+        <div className="text-center mt-4">
+          <span className="text-gray-500">¿No tienes cuenta? </span>
+          <Link to="/register" className="text-blue-600 hover:underline">Regístrate aquí</Link>
+        </div>
       </div>
     </div>
   );

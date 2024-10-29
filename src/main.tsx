@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import App from './App';
 import Login from './Login';
+import Register from './Register';
 import './css/style.css';
 import './css/satoshi.css';
 import 'jsvectormap/dist/css/jsvectormap.css';
@@ -15,6 +16,7 @@ root.render(
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/Register" element={<Register />} />
         <Route path="/admin/*" element={<App />} />
         <Route path="/pasajeros/*" element={<App />} />
       </Routes>
