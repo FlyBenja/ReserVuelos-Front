@@ -116,32 +116,32 @@ const Reservaciones: React.FC = () => {
       <Breadcrumb pageName="Reservaciones" />
 
       {/* Botón para abrir el modal de crear */}
-      <div className="flex justify-end p-0">
+      <div className="flex justify-end mb-4">
         <button
           onClick={() => setShowCreateModal(true)}
-          className="bg-green-500 text-white px-4 py-2 rounded shadow"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105"
         >
-          Crear Reservación
+          + Crear Reservación
         </button>
       </div>
 
       {/* Listado de reservaciones en cards */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 p-4">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 p-4">
         {reservations.map((reservation) => (
-          <div key={reservation.id} className="bg-white shadow-lg rounded-lg p-6 flex flex-col justify-between">
-            <h3 className="text-lg font-semibold">Código: {reservation.code}</h3>
-            <p>Inicio: {reservation.startDate}</p>
-            <p>Final: {reservation.endDate}</p>
-            <div className="mt-4 flex justify-between">
+          <div key={reservation.id} className="bg-white shadow-lg rounded-lg p-6 flex flex-col justify-between border border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">Código: {reservation.code}</h3>
+            <p className="text-gray-600">Inicio: {reservation.startDate}</p>
+            <p className="text-gray-600">Final: {reservation.endDate}</p>
+            <div className="mt-4 flex space-x-4">
               <button
                 onClick={() => openUpdateModal(reservation.id)}
-                className="bg-blue-500 text-white px-4 py-2 rounded shadow"
+                className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
               >
                 Actualizar
               </button>
               <button
                 onClick={() => handleDelete(reservation.id)}
-                className="bg-red-500 text-white px-4 py-2 rounded shadow"
+                className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
               >
                 Eliminar
               </button>
@@ -150,88 +150,54 @@ const Reservaciones: React.FC = () => {
         ))}
       </div>
 
-      {/* Modal para crear nueva reservación */}
-      {showCreateModal && (
+      {/* Modal para crear y actualizar */}
+      {(showCreateModal || showUpdateModal) && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-            <h2 className="text-2xl font-semibold mb-4">Crear Nueva Reservación</h2>
+          <div className="bg-white p-8 rounded-lg shadow-lg w-96 border border-gray-300">
+            <h2 className="text-2xl font-semibold mb-4">
+              {showCreateModal ? 'Crear Nueva Reservación' : 'Actualizar Reservación'}
+            </h2>
             <input
               type="text"
               value={newCode}
               onChange={(e) => setNewCode(e.target.value)}
               placeholder="Código de Reservación"
-              className="w-full p-2 border border-gray-300 rounded mb-4"
+              className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <input
-              type="date"
-              value={newStartDate}
-              onChange={(e) => setNewStartDate(e.target.value)}
-              placeholder="Fecha de Inicio"
-              className="w-full p-2 border border-gray-300 rounded mb-4"
-            />
-            <input
-              type="date"
-              value={newEndDate}
-              onChange={(e) => setNewEndDate(e.target.value)}
-              placeholder="Fecha de Finalización"
-              className="w-full p-2 border border-gray-300 rounded mb-4"
-            />
-            <div className="flex justify-end">
-              <button
-                onClick={() => setShowCreateModal(false)}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleCreate}
-                className="bg-green-500 text-white px-4 py-2 rounded shadow"
-              >
-                Crear
-              </button>
+            {/* Contenedor para las fechas en la misma línea */}
+            <div className="flex space-x-4">
+              <input
+                type="date"
+                value={newStartDate}
+                onChange={(e) => setNewStartDate(e.target.value)}
+                placeholder="Fecha de Inicio"
+                className="w-1/2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <input
+                type="date"
+                value={newEndDate}
+                onChange={(e) => setNewEndDate(e.target.value)}
+                placeholder="Fecha de Finalización"
+                className="w-1/2 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal para actualizar reservación */}
-      {showUpdateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-            <h2 className="text-2xl font-semibold mb-4">Actualizar Reservación</h2>
-            <input
-              type="text"
-              value={newCode}
-              onChange={(e) => setNewCode(e.target.value)}
-              placeholder="Código de Reservación"
-              className="w-full p-2 border border-gray-300 rounded mb-4"
-            />
-            <input
-              type="date"
-              value={newStartDate}
-              onChange={(e) => setNewStartDate(e.target.value)}
-              placeholder="Fecha de Inicio"
-              className="w-full p-2 border border-gray-300 rounded mb-4"
-            />
-            <input
-              type="date"
-              value={newEndDate}
-              onChange={(e) => setNewEndDate(e.target.value)}
-              placeholder="Fecha de Finalización"
-              className="w-full p-2 border border-gray-300 rounded mb-4"
-            />
-            <div className="flex justify-end">
+            <div className="flex justify-end space-x-2 mt-4">
               <button
-                onClick={() => setShowUpdateModal(false)}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2"
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setShowUpdateModal(false);
+                }}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold px-4 py-2 rounded-lg transition-colors"
               >
                 Cancelar
               </button>
               <button
-                onClick={handleUpdate}
-                className="bg-blue-500 text-white px-4 py-2 rounded shadow"
+                onClick={showCreateModal ? handleCreate : handleUpdate}
+                className={`${
+                  showCreateModal ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'
+                } text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105`}
               >
-                Actualizar
+                {showCreateModal ? 'Crear' : 'Actualizar'}
               </button>
             </div>
           </div>

@@ -92,30 +92,30 @@ const Roles: React.FC = () => {
       <Breadcrumb pageName="Roles" />
 
       {/* Botón para abrir el modal de crear */}
-      <div className="flex justify-end p-0">
+      <div className="flex justify-end mb-4">
         <button
           onClick={() => setShowCreateModal(true)}
-          className="bg-green-500 text-white px-4 py-2 rounded shadow"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105"
         >
-          Crear Rol
+          + Crear Rol
         </button>
       </div>
 
-      {/* Listado de roles en cards de TailAdmin */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 p-4">
+      {/* Listado de roles en cards con mejoras UI/UX */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 p-4">
         {roles.map((role) => (
-          <div key={role.id} className="bg-white shadow-lg rounded-lg p-6 flex flex-col justify-between">
-            <h3 className="text-lg font-semibold">{role.name}</h3>
-            <div className="mt-4 flex justify-between">
+          <div key={role.id} className="bg-white shadow-lg rounded-lg p-6 flex flex-col justify-between border border-gray-200">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">{role.name}</h3>
+            <div className="flex space-x-4">
               <button
                 onClick={() => openUpdateModal(role.id, role.name)}
-                className="bg-blue-500 text-white px-4 py-2 rounded shadow"
+                className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
               >
                 Actualizar
               </button>
               <button
                 onClick={() => handleDelete(role.id)}
-                className="bg-red-500 text-white px-4 py-2 rounded shadow"
+                className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
               >
                 Eliminar
               </button>
@@ -124,60 +124,41 @@ const Roles: React.FC = () => {
         ))}
       </div>
 
-      {/* Modal para crear nuevo rol */}
-      {showCreateModal && (
+      {/* Modal para crear y actualizar */}
+      {(showCreateModal || showUpdateModal) && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-            <h2 className="text-2xl font-semibold mb-4">Crear Nuevo Rol</h2>
+          <div className="bg-white p-8 rounded-lg shadow-lg w-96 border border-gray-300">
+            <h2 className="text-2xl font-semibold mb-4">
+              {showCreateModal ? 'Crear Nuevo Rol' : 'Actualizar Rol'}
+            </h2>
             <input
               type="text"
-              value={newRoleName}
-              onChange={(e) => setNewRoleName(e.target.value)}
+              value={showCreateModal ? newRoleName : currentRoleName}
+              onChange={(e) =>
+                showCreateModal
+                  ? setNewRoleName(e.target.value)
+                  : setCurrentRoleName(e.target.value)
+              }
               placeholder="Nombre del Rol"
-              className="w-full p-2 border border-gray-300 rounded mb-4"
+              className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <div className="flex justify-end">
+            <div className="flex justify-end space-x-2">
               <button
-                onClick={() => setShowCreateModal(false)}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2"
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setShowUpdateModal(false);
+                }}
+                className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold px-4 py-2 rounded-lg transition-colors"
               >
                 Cancelar
               </button>
               <button
-                onClick={handleCreate}
-                className="bg-green-500 text-white px-4 py-2 rounded shadow"
+                onClick={showCreateModal ? handleCreate : handleUpdate}
+                className={`${
+                  showCreateModal ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'
+                } text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105`}
               >
-                Crear
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal para actualizar rol */}
-      {showUpdateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-            <h2 className="text-2xl font-semibold mb-4">Actualizar Rol</h2>
-            <input
-              type="text"
-              value={currentRoleName}
-              onChange={(e) => setCurrentRoleName(e.target.value)}
-              placeholder="Nombre del Rol"
-              className="w-full p-2 border border-gray-300 rounded mb-4"
-            />
-            <div className="flex justify-end">
-              <button
-                onClick={() => setShowUpdateModal(false)}
-                className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleUpdate}
-                className="bg-blue-500 text-white px-4 py-2 rounded shadow"
-              >
-                Actualizar
+                {showCreateModal ? 'Crear' : 'Actualizar'}
               </button>
             </div>
           </div>
