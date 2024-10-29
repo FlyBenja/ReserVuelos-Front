@@ -10,6 +10,7 @@ import InfoPasajeros from './pages/Admin/InfoPasajeros';
 
 //Pasajeros
 import Reservas from './pages/Pasajero/ListarReservas';
+import CrearReservas from './pages/Pasajero/CrearReservas';
 
 //Datos Generales
 import Profile from './pages/DatosPerfil/Profile';
@@ -39,6 +40,8 @@ function App() {
         <Route path="info-Pasajero" element={<InfoPasajeros />} />
 
         <Route path="reservas" element={<Reservas />} />
+        <Route path="crear-reservas" element={<CrearReservas />} />
+
 
         <Route path="profile" element={<Profile />} />
         <Route path="settings" element={<Settings />} />
