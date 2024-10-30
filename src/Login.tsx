@@ -1,20 +1,59 @@
 import { useNavigate, Link } from "react-router-dom";
-import { FaUser, FaLock } from "react-icons/fa"; // Cambié el icono a FaUser para Usuario
+import { FaUser, FaLock } from "react-icons/fa";
+import Swal from "sweetalert2"; // Importa SweetAlert2
 import umgLogo from './images/Login/Avion.png';
 import ofiLogo from './images/Login/Aeropuerto.jpg';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  
+
   const role: number = 1; // Cambia este valor a 1 para simular el rol de Admin
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
+
+    // Obtener los valores de los campos
+    const username = (document.getElementById("username") as HTMLInputElement).value;
+    const password = (document.getElementById("password") as HTMLInputElement).value;
+
+    // Validaciones con SweetAlert2
+    if (!username) {
+      Swal.fire({
+        icon: "warning",
+        title: "Campo Requerido",
+        text: "Por favor, ingresa tu usuario.",
+      });
+      return;
+    }
+
+    if (!password) {
+      Swal.fire({
+        icon: "warning",
+        title: "Campo Requerido",
+        text: "Por favor, ingresa tu contraseña.",
+      });
+      return;
+    }
+
+    // Simulación de autenticación basada en el rol
     if (role === 1) {
-      navigate("/admin/roles"); // Redirige a la página de roles para Admin
+      Swal.fire({
+        icon: "success",
+        title: "Inicio de Sesión Exitoso",
+        text: "Bienvenido, Admin.",
+      }).then(() => navigate("/admin/roles"));
     } else if (role === 2) {
-      navigate("/pasajeros/reservas"); // Redirige a la página de pasajeros para Secretario
+      Swal.fire({
+        icon: "success",
+        title: "Inicio de Sesión Exitoso",
+        text: "Bienvenido, Secretario.",
+      }).then(() => navigate("/pasajeros/reservas"));
+    } else {
+      Swal.fire({
+        icon: "error",
+        title: "Error de Autenticación",
+        text: "Usuario o contraseña incorrectos.",
+      });
     }
   };
 
@@ -66,3 +105,4 @@ const Login: React.FC = () => {
 };
 
 export default Login;
+  

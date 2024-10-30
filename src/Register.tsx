@@ -13,11 +13,39 @@ const Register: React.FC = () => {
   const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Validaciones con SweetAlert2
+    if (!username) {
+      Swal.fire({
+        icon: "warning",
+        title: "Campo Requerido",
+        text: "Por favor, ingresa un nombre de usuario.",
+      });
+      return;
+    }
+
+    if (!password) {
+      Swal.fire({
+        icon: "warning",
+        title: "Campo Requerido",
+        text: "Por favor, ingresa una contraseña.",
+      });
+      return;
+    }
+
+    if (!confirmPassword) {
+      Swal.fire({
+        icon: "warning",
+        title: "Campo Requerido",
+        text: "Por favor, confirma tu contraseña.",
+      });
+      return;
+    }
+
     if (password !== confirmPassword) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Las contraseñas no coinciden",
+        text: "Las contraseñas no coinciden.",
       });
       return;
     }
