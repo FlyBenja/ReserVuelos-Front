@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 
 interface PassengerInfo {
@@ -13,11 +13,23 @@ interface PassengerInfo {
 
 const InfoPasajeros: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const passenger = location.state?.passenger as PassengerInfo;
 
   return (
     <>
       <Breadcrumb pageName="Información del Pasajero" />
+
+      {/* Botón de Regresar */}
+      <div className="mb-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center"
+        >
+          <span className="mr-2">&#8592;</span>
+          Regresar
+        </button>
+      </div>
 
       <div className="mx-auto max-w-5xl px-4 py-6">
         <div className="bg-white dark:bg-boxdark shadow-lg rounded-lg overflow-hidden">

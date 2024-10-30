@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import Swal from 'sweetalert2';
 
@@ -13,6 +13,7 @@ interface ReservationInfo {
 
 const InfoReserva: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const reservation = location.state?.reservation as ReservationInfo;
 
   const [reservationStatus, setReservationStatus] = useState('Confirmado');
@@ -45,6 +46,17 @@ const InfoReserva: React.FC = () => {
   return (
     <>
       <Breadcrumb pageName="Información de la Reservación" />
+
+      {/* Botón de Regresar con flecha "<--" */}
+      <div className="mb-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center"
+        >
+          <span className="mr-2">&#8592;</span> {/* Flecha hacia la izquierda */}
+          Regresar
+        </button>
+      </div>
 
       <div className="mx-auto max-w-5xl px-4 py-6">
         <div className="bg-white dark:bg-boxdark shadow-lg rounded-lg overflow-hidden">

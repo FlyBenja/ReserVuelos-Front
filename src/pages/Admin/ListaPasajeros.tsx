@@ -14,9 +14,9 @@ const Pasajeros: React.FC = () => {
   const [filteredPassengers, setFilteredPassengers] = useState<Passenger[]>([]);
   const [searchName, setSearchName] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const passengersPerPage = 6;
+  const passengersPerPage = 5;
   const [maxPageButtons] = useState(10);
-  
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -52,6 +52,7 @@ const Pasajeros: React.FC = () => {
       { id: 29, name: 'José Molina', seat: '21B', profilePhoto: 'https://randomuser.me/api/portraits/men/15.jpg' },
       { id: 30, name: 'Sara Vásquez', seat: '21C', profilePhoto: 'https://randomuser.me/api/portraits/women/15.jpg' },
     ];
+
     setPassengers(examplePassengers);
     setFilteredPassengers(examplePassengers);
   }, []);
@@ -105,8 +106,19 @@ const Pasajeros: React.FC = () => {
   return (
     <>
       <Breadcrumb pageName="Listar Pasajeros" />
-      <div className="mx-auto max-w-5xl px-1 py-1">
 
+      {/* Botón de Regresar */}
+      <div className="mb-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center"
+        >
+          <span className="mr-2">&#8592;</span>
+          Regresar
+        </button>
+      </div>
+
+      <div className="mx-auto max-w-5xl px-1 py-1">
         {/* Campo de búsqueda por nombre */}
         <div className="mb-4">
           <input

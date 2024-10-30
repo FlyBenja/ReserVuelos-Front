@@ -7,7 +7,7 @@ import ofiLogo from './images/Login/Aeropuerto.jpg';
 const Login: React.FC = () => {
   const navigate = useNavigate();
 
-  const role: number = 1; // Cambia este valor a 1 para simular el rol de Admin
+  const role: number = 2; // Cambia este valor a 1 para simular el rol de Admin
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
