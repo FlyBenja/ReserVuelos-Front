@@ -1,12 +1,12 @@
 import { useNavigate, Link } from "react-router-dom";
-import { FaEnvelope, FaLock } from "react-icons/fa";
+import { FaUser, FaLock } from "react-icons/fa"; // Cambié el icono a FaUser para Usuario
 import umgLogo from './images/Login/Avion.png';
 import ofiLogo from './images/Login/Aeropuerto.jpg';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
   
-  const role: number = 2; // Cambia este valor a 1 para simular el rol de Admin
+  const role: number = 1; // Cambia este valor a 1 para simular el rol de Admin
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -27,16 +27,16 @@ const Login: React.FC = () => {
         </div>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-1">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Correo</label>
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700">Usuario</label>
             <div className="relative">
               <input 
-                id="email"
-                type="email" 
+                id="username"
+                type="text" 
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" 
-                placeholder="Correo" 
+                placeholder="Usuario" 
               />
               <span className="absolute inset-y-0 right-3 flex items-center text-gray-500">
-                <FaEnvelope />
+                <FaUser />
               </span>
             </div>
           </div>

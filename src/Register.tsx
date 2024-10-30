@@ -76,7 +76,7 @@ const Register: React.FC = () => {
               required
             />
           </div>
-          <button type="submit" className="w-full py-2 text-white bg-green-600 rounded-lg hover:bg-green-700">Registrar</button>
+          <button type="submit" className="w-full py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">Registrar</button>
         </form>
         <div className="text-center mt-4">
           <span className="text-gray-500">¿Ya tienes cuenta? </span>
