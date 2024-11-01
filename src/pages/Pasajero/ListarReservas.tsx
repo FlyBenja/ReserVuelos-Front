@@ -28,34 +28,34 @@ const ListarReservas: React.FC = () => {
 
           // Llamada para obtener las reservas del usuario específico
           const userReservationsData = await fetchReservationsByUserId(userProfile.id);
-          console.log("fetchReservationsByUserId", userReservationsData);
 
           // Llamada para obtener todos los nombres de reserva
           const allReservationsData = await fetchReservations(token);
-          console.log("fetchReservations", allReservationsData);
           
           if (Array.isArray(userReservationsData) && Array.isArray(allReservationsData)) {
             const mappedReservations = await Promise.all(
               userReservationsData.map(async (res) => {
-                const formattedStartDate = new Date(res.createdAt).toLocaleDateString("es-ES");
-                const formattedEndDate = new Date(res.updatedAt).toLocaleDateString("es-ES");
-
                 // Obtener el nombre de la clase de vuelo
                 const flightClass = await getFlightClassDescription(res.clasevuelo_id, token);
 
-                // Buscar el código de reserva en allReservationsData usando reserva_id
+                // Buscar el código de reserva y las fechas en allReservationsData usando reserva_id
                 const reservationMatch = allReservationsData.find(
                   (reservation) => reservation.id === res.reserva_id
                 );
 
-                // Asignar `codigoReserva` si hay coincidencia, o "Reserva no disponible" si no la hay
                 const reservationCode = reservationMatch ? reservationMatch.codigoReserva : "Reserva no disponible";
+                const startDate = reservationMatch
+                  ? reservationMatch.fechaInicio.substring(0, 10).split('-').reverse().join('/')
+                  : "Fecha no disponible";
+                const endDate = reservationMatch
+                  ? reservationMatch.fechaFinal.substring(0, 10).split('-').reverse().join('/')
+                  : "Fecha no disponible";
 
                 return {
                   id: res.id,
-                  code: reservationCode, // Usar `codigoReserva` como `code`
-                  startDate: formattedStartDate || "Fecha no disponible",
-                  endDate: formattedEndDate || "Fecha no disponible",
+                  code: reservationCode,
+                  startDate,
+                  endDate,
                   flightClass: flightClass || "Clase no disponible",
                 };
               })
@@ -116,7 +116,7 @@ const ListarReservas: React.FC = () => {
                 <th className="py-2 px-4 text-center">Código de Reserva</th>
                 <th className="py-2 px-4 text-center">Fecha de Inicio</th>
                 <th className="py-2 px-4 text-center">Fecha Final</th>
-                <th className="py-2 px-4 text-center">Clase de Vuelo</th>
+                <th className="py-4 px-4 text-center">Clase de Vuelo</th>
               </tr>
             </thead>
             <tbody>
