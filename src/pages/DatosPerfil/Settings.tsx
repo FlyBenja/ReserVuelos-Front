@@ -1,14 +1,45 @@
-import React, { useState } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import Swal from "sweetalert2";
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
+import { getUserProfile } from "../../Service/getUserProfile";
+import { updateUsername } from "../../Service/DatosPerfil/UpdateName";
+import { updatePassword } from "../../Service/DatosPerfil/UpdateContra";
+import { getRoleById } from "../../Service/GetRoleId";
 
 const Settings = () => {
-  const [username, setUsername] = useState("devidjond45");
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
+  const [username, setUsername] = useState<string>("");
+  const [currentUsername, setCurrentUsername] = useState<string>("");
+  const [roleName, setRoleName] = useState<string>(""); // Estado para el nombre del rol
+  const [currentPassword, setCurrentPassword] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
+  const [repeatPassword, setRepeatPassword] = useState<string>("");
 
-  const handleSaveUserInfo = (e: React.FormEvent<HTMLFormElement>) => {
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const profileData = await getUserProfile(token);
+          setUsername(profileData.username);
+          setCurrentUsername(profileData.username);
+
+          // Llama a getRoleById para obtener el nombre del rol
+          const roleData = await getRoleById(profileData.roleId, token);
+          setRoleName(roleData); // Asigna el nombre del rol al estado
+        }
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "No se pudo cargar la información del usuario.",
+        });
+      }
+    };
+
+    loadUserProfile();
+  }, []);
+
+  const handleSaveUserInfo = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!username) {
@@ -20,14 +51,36 @@ const Settings = () => {
       return;
     }
 
-    Swal.fire({
-      icon: "success",
-      title: "Guardado",
-      text: "La información del usuario ha sido actualizada.",
-    });
+    if (username === currentUsername) {
+      Swal.fire({
+        icon: "warning",
+        title: "Sin cambios",
+        text: "El nombre de usuario es igual al actual.",
+      });
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        await updateUsername(token, username);
+        Swal.fire({
+          icon: "success",
+          title: "Guardado",
+          text: "El nombre de usuario ha sido actualizado correctamente.",
+        });
+        setCurrentUsername(username);
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo actualizar el nombre de usuario.",
+      });
+    }
   };
 
-  const handlePasswordChange = (e: React.FormEvent<HTMLFormElement>) => {
+  const handlePasswordChange = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!currentPassword || !newPassword || !repeatPassword) {
@@ -48,16 +101,28 @@ const Settings = () => {
       return;
     }
 
-    Swal.fire({
-      icon: "success",
-      title: "Contraseña Actualizada",
-      text: "La contraseña ha sido cambiada exitosamente.",
-    });
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        await updatePassword(token, currentPassword, newPassword, repeatPassword);
+        Swal.fire({
+          icon: "success",
+          title: "Contraseña Actualizada",
+          text: "La contraseña ha sido cambiada exitosamente.",
+        });
 
-    // Limpiar campos después de guardar
-    setCurrentPassword("");
-    setNewPassword("");
-    setRepeatPassword("");
+        // Limpiar campos después de guardar
+        setCurrentPassword("");
+        setNewPassword("");
+        setRepeatPassword("");
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo actualizar la contraseña. Verifique su contraseña actual.",
+      });
+    }
   };
 
   return (
@@ -88,7 +153,7 @@ const Settings = () => {
                   <input
                     type="text"
                     id="role"
-                    value="Admin"
+                    value={roleName || "Rol Desconocido"}
                     disabled
                     className="w-full rounded border border-stroke bg-gray-200 py-2 px-4 text-black dark:border-strokedark dark:bg-gray-600 dark:text-black"
                     style={{ backgroundColor: '#f3f4f6' }}

@@ -1,8 +1,37 @@
+import { useEffect, useState } from 'react';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import userSix from '../../images/user/user-06.png'; // Imagen de perfil proporcionada
 import ofiLogo from '../../images/Login/Aeropuerto.jpg';
+import { getUserProfile } from '../../Service/getUserProfile';
+import { getRoleById } from '../../Service/GetRoleId';
 
 const Profile = () => {
+  const [username, setUsername] = useState('');
+  const [roleName, setRoleName] = useState('');
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          // Llama a getUserProfile para obtener los datos del perfil
+          const profileData = await getUserProfile(token);
+          setUsername(profileData.username);
+
+          // Llama a getRoleById usando el roleId obtenido
+          const userRole = await getRoleById(profileData.roleId, token);
+          setRoleName(userRole);
+        } else {
+          console.error("Token no disponible");
+        }
+      } catch (error) {
+        console.error("Error al obtener el perfil o rol del usuario:", error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   return (
     <>
       <Breadcrumb pageName="Profile" />
@@ -20,12 +49,12 @@ const Profile = () => {
           </div>
           <div className="mt-1">
             <h3 className="mb-1 text-xl font-semibold text-black dark:text-white">
-              Danish Heilium
+              {username || 'Nombre de Usuario'}
             </h3>
             <div className="mx-auto mt-2 grid max-w-lg rounded-md border border-stroke py-2 dark:border-strokedark dark:bg-[#37404F]">
               <div className="flex flex-col items-center justify-center px-2">
                 <span className="font-semibold text-black dark:text-white">
-                  Administrador
+                  {roleName || 'Rol Desconocido'}
                 </span>
               </div>
             </div>

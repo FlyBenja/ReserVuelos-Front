@@ -1,48 +1,71 @@
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import 'sweetalert2/src/sweetalert2.scss';
 
-const Roles: React.FC = () => {
-  const [roles, setRoles] = useState([
-    { id: 1, name: 'Administrador' },
-    { id: 2, name: 'Editor' },
-    { id: 3, name: 'Usuario' },
-  ]);
+// Importar las APIs de roles
+import { getRoles } from '../../Service/Admin/TraeRole';
+import { createRole } from '../../Service/Admin/GrabaRole';
+import { updateRole } from '../../Service/Admin/UpdateRole';
+import { deleteRole } from '../../Service/Admin/DeleteRole';
 
+const Roles: React.FC = () => {
+  const [roles, setRoles] = useState<{ id: number; nombreRole: string }[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [newRoleName, setNewRoleName] = useState('');
   const [currentRoleId, setCurrentRoleId] = useState<number | null>(null);
   const [currentRoleName, setCurrentRoleName] = useState('');
 
-  // Función para eliminar un rol
-  const handleDelete = (id: number) => {
-    const roleName = roles.find((role) => role.id === id)?.name || 'Rol';
-    setRoles((prevRoles) => prevRoles.filter((role) => role.id !== id));
-    Swal.fire({
-      icon: 'success',
-      title: 'Eliminado',
-      text: `El rol "${roleName}" ha sido eliminado correctamente`,
-      timer: 2000,
-      showConfirmButton: false,
-    });
-  };
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const data = await getRoles();
+        setRoles(data);
+      } catch (error) {
+        Swal.fire('Error', error as string, 'error');
+      }
+    };
 
-  // Función para crear un nuevo rol
-  const handleCreate = () => {
-    if (newRoleName.trim()) {
-      const newRole = { id: roles.length + 1, name: newRoleName };
-      setRoles((prevRoles) => [...prevRoles, newRole]);
+    fetchRoles();
+  }, []);
+
+  // Función para eliminar un rol
+  const handleDelete = async (id: number) => {
+    try {
+      const roleName = roles.find((role) => role.id === id)?.nombreRole || 'Rol';
+      await deleteRole(id);
+      setRoles((prevRoles) => prevRoles.filter((role) => role.id !== id));
       Swal.fire({
         icon: 'success',
-        title: 'Creado',
-        text: `El rol "${newRoleName}" ha sido creado exitosamente`,
+        title: 'Eliminado',
+        text: `El rol "${roleName}" ha sido eliminado correctamente`,
         timer: 2000,
         showConfirmButton: false,
       });
-      setNewRoleName('');
-      setShowCreateModal(false);
+    } catch (error) {
+      Swal.fire('Error', error as string, 'error');
+    }
+  };
+
+  // Función para crear un nuevo rol
+  const handleCreate = async () => {
+    if (newRoleName.trim()) {
+      try {
+        const newRole = await createRole(newRoleName);
+        setRoles((prevRoles) => [...prevRoles, newRole]);
+        Swal.fire({
+          icon: 'success',
+          title: 'Creado',
+          text: `El rol "${newRoleName}" ha sido creado exitosamente`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
+        setNewRoleName('');
+        setShowCreateModal(false);
+      } catch (error) {
+        Swal.fire('Error', error as string, 'error');
+      }
     } else {
       Swal.fire({
         icon: 'warning',
@@ -55,27 +78,33 @@ const Roles: React.FC = () => {
   };
 
   // Función para abrir el modal de actualización
-  const openUpdateModal = (id: number, name: string) => {
+  const openUpdateModal = (id: number, nombreRole: string) => {
     setCurrentRoleId(id);
-    setCurrentRoleName(name);
+    setCurrentRoleName(nombreRole);
     setShowUpdateModal(true);
   };
 
   // Función para actualizar un rol
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (currentRoleId !== null && currentRoleName.trim()) {
-      const updatedRoles = roles.map((role) =>
-        role.id === currentRoleId ? { ...role, name: currentRoleName } : role
-      );
-      setRoles(updatedRoles);
-      Swal.fire({
-        icon: 'success',
-        title: 'Actualizado',
-        text: `El rol ha sido actualizado a "${currentRoleName}"`,
-        timer: 2000,
-        showConfirmButton: false,
-      });
-      setShowUpdateModal(false);
+      try {
+        await updateRole(currentRoleId, currentRoleName);
+        setRoles((prevRoles) =>
+          prevRoles.map((role) =>
+            role.id === currentRoleId ? { ...role, nombreRole: currentRoleName } : role
+          )
+        );
+        Swal.fire({
+          icon: 'success',
+          title: 'Actualizado',
+          text: `El rol ha sido actualizado a "${currentRoleName}"`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
+        setShowUpdateModal(false);
+      } catch (error) {
+        Swal.fire('Error', error as string, 'error');
+      }
     } else {
       Swal.fire({
         icon: 'warning',
@@ -101,14 +130,14 @@ const Roles: React.FC = () => {
         </button>
       </div>
 
-      {/* Listado de roles en cards con mejoras UI/UX */}
+      {/* Listado de roles en cards */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 p-4">
         {roles.map((role) => (
-          <div key={role.id} className="bg-white shadow-lg rounded-lg p-6 flex flex-col justify-between border border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">{role.name}</h3>
+          <div key={role.id} className="bg-white dark:bg-gray-800 dark:text-white shadow-lg rounded-lg p-6 flex flex-col justify-between border border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">{role.nombreRole}</h3>
             <div className="flex space-x-4">
               <button
-                onClick={() => openUpdateModal(role.id, role.name)}
+                onClick={() => openUpdateModal(role.id, role.nombreRole)}
                 className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
               >
                 Actualizar
@@ -127,7 +156,7 @@ const Roles: React.FC = () => {
       {/* Modal para crear y actualizar */}
       {(showCreateModal || showUpdateModal) && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-96 border border-gray-300">
+          <div className="bg-white dark:bg-gray-800 dark:text-white p-8 rounded-lg shadow-lg w-96 border border-gray-300">
             <h2 className="text-2xl font-semibold mb-4">
               {showCreateModal ? 'Crear Nuevo Rol' : 'Actualizar Rol'}
             </h2>
@@ -140,7 +169,7 @@ const Roles: React.FC = () => {
                   : setCurrentRoleName(e.target.value)
               }
               placeholder="Nombre del Rol"
-              className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 border border-gray-300 dark:bg-gray-700 dark:text-white rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <div className="flex justify-end space-x-2">
               <button
@@ -148,15 +177,14 @@ const Roles: React.FC = () => {
                   setShowCreateModal(false);
                   setShowUpdateModal(false);
                 }}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold px-4 py-2 rounded-lg transition-colors"
+                className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold px-4 py-2 rounded-lg transition-colors dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-white"
               >
                 Cancelar
               </button>
               <button
                 onClick={showCreateModal ? handleCreate : handleUpdate}
-                className={`${
-                  showCreateModal ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'
-                } text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105`}
+                className={`${showCreateModal ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'
+                  } text-white font-semibold px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105`}
               >
                 {showCreateModal ? 'Crear' : 'Actualizar'}
               </button>

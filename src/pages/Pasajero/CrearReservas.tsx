@@ -1,60 +1,142 @@
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import 'sweetalert2/src/sweetalert2.scss';
 import { useNavigate } from 'react-router-dom';
+import { fetchReservationsByUserId } from '../../Service/Pasajeros/TraeReserUser';
+import { fetchReservations } from '../../Service/Admin/TraeReservas';
+import { getFlightClasses } from '../../Service/Admin/TraeVuelos';
+import { saveReservation } from '../../Service/Pasajeros/GrabaReservJun';
+import { getUserProfile } from '../../Service/getUserProfile';
+import { getFlightClassDescription } from '../../Service/Pasajeros/TraeDescriVuelos';
+import { toggleReservationStatus as toggleStatusAPI } from '../../Service/Pasajeros/CambEstatResv';
 
 interface Reservation {
   id: number;
   code: string;
   passport: string;
   seat: string;
-  flightNumber: string;
   flightClass: string;
   isActive: boolean;
 }
 
 const CrearReservación: React.FC = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
+  const [availableCodes, setAvailableCodes] = useState<{ id: number; code: string }[]>([]);
+  const [flightClasses, setFlightClasses] = useState<{ id: number; name: string }[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedCode, setSelectedCode] = useState('');
   const [newPassport, setNewPassport] = useState('');
   const [newSeat, setNewSeat] = useState('');
-  const [newFlightNumber, setNewFlightNumber] = useState('');
   const [selectedFlightClass, setSelectedFlightClass] = useState('');
+  const [selectedFlightNumber, setSelectedFlightNumber] = useState('');
+  const [userId, setUserId] = useState<number | null>(null);
   const navigate = useNavigate();
 
-  const availableCodes = ['ABC123', 'DEF456', 'GHI789', 'JKL012', 'MNO345'];
-  const flightClasses = ['Económica', 'Ejecutiva', 'Primera Clase'];
+  const flightNumbers = [
+    'UX1234', 'AA5678', 'BA4321', 'LH8765', 'DL7890', 'AF5432', 'IB1234', 'KL9876', 'AZ5678', 'NH2345',
+    'CA8765', 'QR6789', 'EK4567', 'SU9876', 'SQ3456'
+  ];
 
-  // Función para crear una nueva reservación
-  const handleCreate = () => {
-    if (selectedCode && newPassport.trim() && newSeat.trim() && newFlightNumber.trim() && selectedFlightClass) {
-      const newReservation = {
-        id: reservations.length + 1,
-        code: selectedCode,
-        passport: newPassport,
-        seat: newSeat,
-        flightNumber: newFlightNumber,
-        flightClass: selectedFlightClass,
-        isActive: true,
-      };
-      setReservations((prevReservations) => [...prevReservations, newReservation]);
+  // Carga de datos de reservas y clases de vuelo
+  const loadData = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (token) {
+        const userProfile = await getUserProfile(token);
+        setUserId(userProfile.id);
 
+        // Obtener reservas del usuario específico
+        const userReservations = await fetchReservationsByUserId(userProfile.id);
+        const allReservationsData = await fetchReservations(token);
+
+        const mappedReservations = await Promise.all(
+          userReservations.map(async (res: any) => {
+            const flightClassDescription = await getFlightClassDescription(res.clasevuelo_id, token);
+
+            const reservationMatch = allReservationsData.find(
+              (reservation: any) => reservation.id === res.reserva_id
+            );
+
+            const reservationCode = reservationMatch ? reservationMatch.codigoReserva : "Reserva no disponible";
+
+            return {
+              id: res.id,
+              code: reservationCode,
+              passport: res.pasaporte || "No disponible",
+              seat: res.asiento || "No disponible",
+              flightClass: flightClassDescription || "Clase no disponible",
+              isActive: res.status || false,
+            };
+          })
+        );
+        setReservations(mappedReservations);
+
+        // Obtener códigos de reserva para seleccionar en el modal
+        setAvailableCodes(allReservationsData.map((res: any) => ({ id: res.id, code: res.codigoReserva })));
+
+        // Obtener clases de vuelo
+        const flightClassData = await getFlightClasses();
+        setFlightClasses(flightClassData.map((flightClass: any) => ({ id: flightClass.id, name: flightClass.nombreClase })));
+      }
+    } catch (error) {
+      console.error("Error al cargar los datos:", error);
       Swal.fire({
-        icon: 'success',
-        title: 'Reservación creada',
-        text: `La reservación para el vuelo ${newFlightNumber} ha sido creada exitosamente`,
-        timer: 2000,
-        showConfirmButton: false,
+        icon: 'error',
+        title: 'Error al cargar datos',
+        text: 'No se pudo cargar la información de usuario, reservaciones y clases de vuelo.',
+        confirmButtonColor: '#10B981',
       });
+    }
+  };
 
-      setSelectedCode('');
-      setNewPassport('');
-      setNewSeat('');
-      setNewFlightNumber('');
-      setSelectedFlightClass('');
-      setShowCreateModal(false);
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const handleCreate = async () => {
+    if (selectedCode && newPassport.trim() && newSeat.trim() && selectedFlightClass && selectedFlightNumber && userId) {
+      try {
+        const token = localStorage.getItem('token');
+        const reservationData = {
+          user_id: userId,
+          reserva_id: availableCodes.find(code => code.code === selectedCode)?.id,
+          clasevuelo_id: flightClasses.find(flightClass => flightClass.name === selectedFlightClass)?.id,
+          pasaporte: newPassport,
+          asiento: newSeat,
+          numero_vuelo: selectedFlightNumber, // Campo ajustado a 'numero_vuelo'
+          status: true,
+        };
+  
+        await saveReservation(token, reservationData);
+  
+        Swal.fire({
+          icon: 'success',
+          title: 'Reservación creada',
+          text: `La reservación ha sido creada exitosamente`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
+  
+        // Limpiar campos del modal y cerrar
+        setSelectedCode('');
+        setNewPassport('');
+        setNewSeat('');
+        setSelectedFlightClass('');
+        setSelectedFlightNumber('');
+        setShowCreateModal(false);
+  
+        // Volver a cargar las reservas para que aparezca la nueva
+        loadData();
+      } catch (error) {
+        console.error("Error al crear la reservación:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al crear reservación',
+          text: 'No se pudo crear la reservación.',
+          confirmButtonColor: '#10B981',
+        });
+      }
     } else {
       Swal.fire({
         icon: 'warning',
@@ -64,32 +146,44 @@ const CrearReservación: React.FC = () => {
         showConfirmButton: false,
       });
     }
+  };  
+
+  const toggleReservationStatus = async (id: number, currentStatus: boolean) => {
+    try {
+      // Llamada a la API para cambiar el estado de la reserva
+      await toggleStatusAPI(id, !currentStatus);
+
+      // Actualiza el estado de la reserva en la interfaz
+      setReservations((prevReservations) =>
+        prevReservations.map((reservation) =>
+          reservation.id === id ? { ...reservation, isActive: !currentStatus } : reservation
+        )
+      );
+
+      Swal.fire({
+        icon: 'success',
+        title: 'Estado actualizado',
+        text: 'El estado de la reservación ha sido actualizado con éxito.',
+        timer: 2000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      console.error("Error al actualizar el estado de la reservación:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo actualizar el estado de la reservación.',
+        confirmButtonColor: '#10B981',
+      });
+    }
   };
 
-  // Función para eliminar una reservación
   const handleDelete = (id: number) => {
     setReservations((prevReservations) => prevReservations.filter((reservation) => reservation.id !== id));
     Swal.fire({
       icon: 'success',
-      title: 'Eliminado',
+      title: 'Reservación eliminada',
       text: `La reservación ha sido eliminada correctamente`,
-      timer: 2000,
-      showConfirmButton: false,
-    });
-  };
-
-  // Función para activar/desactivar una reservación
-  const toggleReservationStatus = (id: number) => {
-    setReservations((prevReservations) =>
-      prevReservations.map((reservation) =>
-        reservation.id === id ? { ...reservation, isActive: !reservation.isActive } : reservation
-      )
-    );
-    const currentStatus = reservations.find((reservation) => reservation.id === id)?.isActive;
-    Swal.fire({
-      icon: currentStatus ? 'info' : 'success',
-      title: currentStatus ? 'Desactivada' : 'Activada',
-      text: `La reservación ha sido ${currentStatus ? 'desactivada' : 'activada'}`,
       timer: 2000,
       showConfirmButton: false,
     });
@@ -114,23 +208,21 @@ const CrearReservación: React.FC = () => {
             <div className="flex items-center justify-between mb-2">
               <h3 className="text-xl font-semibold text-gray-800">Pasaporte: {reservation.passport}</h3>
               <button
-                onClick={() => navigate('/pasajeros/info-reservas', { state: { reservation } })}
+                onClick={() => navigate('/pasajeros/info-reservas', { state: { reservation: { ...reservation, flightDataId: reservation.id } } })}
                 className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold py-1 px-2 rounded-lg shadow-md"
               >
                 Ver
               </button>
             </div>
             <p className="text-gray-600 mb-2">Asiento: {reservation.seat}</p>
-            <p className="text-gray-600 mb-2">Número de Vuelo: {reservation.flightNumber}</p>
             <p className="text-gray-600 mb-2">Clase de Vuelo: {reservation.flightClass}</p>
             <p className="text-gray-600 mb-4">Código de Reserva: {reservation.code}</p>
             <p className="text-gray-600 mb-4">Estado: {reservation.isActive ? 'Activa' : 'Inactiva'}</p>
             <div className="flex justify-between">
               <button
-                onClick={() => toggleReservationStatus(reservation.id)}
-                className={`font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105 ${
-                  reservation.isActive ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
-                } text-white`}
+                onClick={() => toggleReservationStatus(reservation.id, reservation.isActive)}
+                className={`font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105 ${reservation.isActive ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
+                  } text-white`}
               >
                 {reservation.isActive ? 'Desactivar' : 'Activar'}
               </button>
@@ -145,11 +237,11 @@ const CrearReservación: React.FC = () => {
         ))}
       </div>
 
-      {/* Modal para crear reservación */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg shadow-lg w-96 border border-gray-300">
             <h2 className="text-2xl font-semibold mb-4">Crear Nueva Reservación</h2>
+
             <select
               value={selectedCode}
               onChange={(e) => setSelectedCode(e.target.value)}
@@ -157,9 +249,32 @@ const CrearReservación: React.FC = () => {
             >
               <option value="" disabled>Seleccione un Código de Reserva</option>
               {availableCodes.map((code) => (
-                <option key={code} value={code}>{code}</option>
+                <option key={code.id} value={code.code}>{code.code}</option>
               ))}
             </select>
+
+            <select
+              value={selectedFlightClass}
+              onChange={(e) => setSelectedFlightClass(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="" disabled>Seleccione Clase de Vuelo</option>
+              {flightClasses.map((flightClass) => (
+                <option key={flightClass.id} value={flightClass.name}>{flightClass.name}</option>
+              ))}
+            </select>
+
+            <select
+              value={selectedFlightNumber}
+              onChange={(e) => setSelectedFlightNumber(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="" disabled>Seleccione Número de Vuelo</option>
+              {flightNumbers.map((number) => (
+                <option key={number} value={number}>{number}</option>
+              ))}
+            </select>
+
             <input
               type="text"
               value={newPassport}
@@ -174,23 +289,7 @@ const CrearReservación: React.FC = () => {
               placeholder="Asiento"
               className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <input
-              type="text"
-              value={newFlightNumber}
-              onChange={(e) => setNewFlightNumber(e.target.value)}
-              placeholder="Número de Vuelo"
-              className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <select
-              value={selectedFlightClass}
-              onChange={(e) => setSelectedFlightClass(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="" disabled>Seleccione Clase de Vuelo</option>
-              {flightClasses.map((flightClass) => (
-                <option key={flightClass} value={flightClass}>{flightClass}</option>
-              ))}
-            </select>
+
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => setShowCreateModal(false)}

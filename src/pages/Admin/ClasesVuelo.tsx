@@ -1,89 +1,101 @@
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import 'sweetalert2/src/sweetalert2.scss';
 
-const ClasesVuelo: React.FC = () => {
-  const [classes, setClasses] = useState([
-    { id: 1, name: 'Económica' },
-    { id: 2, name: 'Ejecutiva' },
-    { id: 3, name: 'Primera Clase' },
-  ]);
+// Importar las APIs de clases de vuelo
+import { getFlightClasses } from '../../Service/Admin/TraeVuelos';
+import { createFlightClass } from '../../Service/Admin/GrabaVuelos';
+import { updateFlightClass } from '../../Service/Admin/UpdateVuelos';
+import { deleteFlightClass } from '../../Service/Admin/DeleteVuelos';
 
+const ClasesVuelo: React.FC = () => {
+  const [classes, setClasses] = useState<{ id: number; nombreClase: string }[]>([]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [newClassName, setNewClassName] = useState('');
   const [currentClassId, setCurrentClassId] = useState<number | null>(null);
   const [currentClassName, setCurrentClassName] = useState('');
 
-  // Función para eliminar una clase
-  const handleDelete = (id: number) => {
-    const className = classes.find((flightClass) => flightClass.id === id)?.name || 'Clase de Vuelo';
-    setClasses((prevClasses) => prevClasses.filter((flightClass) => flightClass.id !== id));
-    Swal.fire({
-      icon: 'success',
-      title: 'Eliminado',
-      text: `La clase de vuelo "${className}" ha sido eliminada correctamente`,
-      timer: 2000,
-      showConfirmButton: false,
-    });
-  };
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const data = await getFlightClasses();
+        setClasses(data);
+      } catch (error) {
+        Swal.fire('Error', error as string, 'error');
+      }
+    };
+    fetchClasses();
+  }, []);
 
-  // Función para crear una nueva clase
-  const handleCreate = () => {
-    if (newClassName.trim()) {
-      const newClass = { id: classes.length + 1, name: newClassName };
-      setClasses((prevClasses) => [...prevClasses, newClass]);
+  const handleDelete = async (id: number) => {
+    try {
+      const className = classes.find((flightClass) => flightClass.id === id)?.nombreClase || 'Clase de Vuelo';
+      await deleteFlightClass(id);
+      setClasses((prevClasses) => prevClasses.filter((flightClass) => flightClass.id !== id));
       Swal.fire({
         icon: 'success',
-        title: 'Creada',
-        text: `La clase de vuelo "${newClassName}" ha sido creada exitosamente`,
+        title: 'Eliminado',
+        text: `La clase de vuelo "${className}" ha sido eliminada correctamente`,
         timer: 2000,
         showConfirmButton: false,
       });
-      setNewClassName('');
-      setShowCreateModal(false);
-    } else {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Error',
-        text: 'El nombre de la clase de vuelo no puede estar vacío',
-        timer: 2000,
-        showConfirmButton: false,
-      });
+    } catch (error) {
+      Swal.fire('Error', error as string, 'error');
     }
   };
 
-  // Función para abrir el modal de actualización
+  const handleCreate = async () => {
+    if (newClassName.trim()) {
+      try {
+        const newClass = await createFlightClass(newClassName);
+        setClasses((prevClasses) => [...prevClasses, newClass]);
+        Swal.fire({
+          icon: 'success',
+          title: 'Creada',
+          text: `La clase de vuelo "${newClassName}" ha sido creada exitosamente`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
+        setNewClassName('');
+        setShowCreateModal(false);
+      } catch (error) {
+        Swal.fire('Error', error as string, 'error');
+      }
+    } else {
+      Swal.fire('Error', 'El nombre de la clase de vuelo no puede estar vacío', 'warning');
+    }
+  };
+
   const openUpdateModal = (id: number, name: string) => {
     setCurrentClassId(id);
     setCurrentClassName(name);
     setShowUpdateModal(true);
   };
 
-  // Función para actualizar una clase
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     if (currentClassId !== null && currentClassName.trim()) {
-      const updatedClasses = classes.map((flightClass) =>
-        flightClass.id === currentClassId ? { ...flightClass, name: currentClassName } : flightClass
-      );
-      setClasses(updatedClasses);
-      Swal.fire({
-        icon: 'success',
-        title: 'Actualizada',
-        text: `La clase de vuelo ha sido actualizada a "${currentClassName}"`,
-        timer: 2000,
-        showConfirmButton: false,
-      });
-      setShowUpdateModal(false);
+      try {
+        await updateFlightClass(currentClassId, currentClassName);
+        setClasses((prevClasses) =>
+          prevClasses.map((flightClass) =>
+            flightClass.id === currentClassId ? { ...flightClass, nombreClase: currentClassName } : flightClass
+          )
+        );
+        Swal.fire({
+          icon: 'success',
+          title: 'Actualizada',
+          text: `La clase de vuelo ha sido actualizada a "${currentClassName}"`,
+          timer: 2000,
+          showConfirmButton: false,
+        });
+        setShowUpdateModal(false);
+      } catch (error) {
+        Swal.fire('Error', error as string, 'error');
+      }
     } else {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Error',
-        text: 'El nombre de la clase de vuelo no puede estar vacío',
-        timer: 2000,
-        showConfirmButton: false,
-      });
+      Swal.fire('Error', 'El nombre de la clase de vuelo no puede estar vacío', 'warning');
     }
   };
 
@@ -91,7 +103,6 @@ const ClasesVuelo: React.FC = () => {
     <>
       <Breadcrumb pageName="Clases de Vuelo" />
 
-      {/* Botón para abrir el modal de crear */}
       <div className="flex justify-end mb-4">
         <button
           onClick={() => setShowCreateModal(true)}
@@ -101,14 +112,13 @@ const ClasesVuelo: React.FC = () => {
         </button>
       </div>
 
-      {/* Listado de clases de vuelo en cards con mejoras UI/UX */}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3 p-4">
         {classes.map((flightClass) => (
-          <div key={flightClass.id} className="bg-white shadow-lg rounded-lg p-6 flex flex-col justify-between border border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">{flightClass.name}</h3>
+          <div key={flightClass.id} className="bg-white dark:bg-gray-800 dark:text-white shadow-lg rounded-lg p-6 flex flex-col justify-between border border-gray-200 dark:border-gray-700">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">{flightClass.nombreClase}</h3>
             <div className="flex space-x-4">
               <button
-                onClick={() => openUpdateModal(flightClass.id, flightClass.name)}
+                onClick={() => openUpdateModal(flightClass.id, flightClass.nombreClase)}
                 className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105"
               >
                 Actualizar
@@ -124,10 +134,9 @@ const ClasesVuelo: React.FC = () => {
         ))}
       </div>
 
-      {/* Modal para crear y actualizar */}
       {(showCreateModal || showUpdateModal) && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg w-96 border border-gray-300">
+          <div className="bg-white dark:bg-gray-800 dark:text-white p-8 rounded-lg shadow-lg w-96 border border-gray-300 dark:border-gray-700">
             <h2 className="text-2xl font-semibold mb-4">
               {showCreateModal ? 'Crear Nueva Clase de Vuelo' : 'Actualizar Clase de Vuelo'}
             </h2>
@@ -140,7 +149,7 @@ const ClasesVuelo: React.FC = () => {
                   : setCurrentClassName(e.target.value)
               }
               placeholder="Nombre de la Clase"
-              className="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-3 border border-gray-300 dark:border-gray-700 dark:bg-gray-700 dark:text-white rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
             <div className="flex justify-end space-x-2">
               <button
@@ -148,7 +157,7 @@ const ClasesVuelo: React.FC = () => {
                   setShowCreateModal(false);
                   setShowUpdateModal(false);
                 }}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold px-4 py-2 rounded-lg transition-colors"
+                className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold px-4 py-2 rounded-lg transition-colors dark:bg-gray-600 dark:hover:bg-gray-700 dark:text-white"
               >
                 Cancelar
               </button>

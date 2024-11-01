@@ -1,39 +1,81 @@
 import React, { useState, useEffect } from 'react';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
+import { fetchReservationsByUserId } from '../../Service/Pasajeros/TraeReserUser';
+import { fetchReservations } from '../../Service/Admin/TraeReservas';
+import { getUserProfile } from '../../Service/getUserProfile';
+import { getFlightClassDescription } from '../../Service/Pasajeros/TraeDescriVuelos';
 
 interface Reservation {
   id: number;
-  code: string;
+  code: string; // Este será el nombre de reserva o código de reserva
   startDate: string;
   endDate: string;
+  flightClass: string;
 }
 
 const ListarReservas: React.FC = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const reservationsPerPage = 8; // Cantidad de reservas por página
-  const [maxPageButtons] = useState(5); // Número máximo de botones de paginación a mostrar
+  const reservationsPerPage = 8;
+  const maxPageButtons = 5;
 
   useEffect(() => {
-    // Datos de ejemplo de reservas
-    const exampleReservations: Reservation[] = [
-      { id: 1, code: 'ABC123', startDate: '2024-11-01', endDate: '2024-11-05' },
-      { id: 2, code: 'DEF456', startDate: '2024-12-01', endDate: '2024-12-05' },
-      { id: 3, code: 'GHI789', startDate: '2025-01-15', endDate: '2025-01-20' },
-      { id: 4, code: 'JKL012', startDate: '2025-02-10', endDate: '2025-02-15' },
-      { id: 5, code: 'MNO345', startDate: '2025-03-05', endDate: '2025-03-10' },
-      { id: 6, code: 'PQR678', startDate: '2025-04-15', endDate: '2025-04-20' },
-      { id: 7, code: 'STU901', startDate: '2025-05-01', endDate: '2025-05-05' },
-      // Agrega más reservas si es necesario
-    ];
+    const loadUserData = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (token) {
+          const userProfile = await getUserProfile(token);
 
-    setReservations(exampleReservations);
+          // Llamada para obtener las reservas del usuario específico
+          const userReservationsData = await fetchReservationsByUserId(userProfile.id);
+          console.log("fetchReservationsByUserId", userReservationsData);
+
+          // Llamada para obtener todos los nombres de reserva
+          const allReservationsData = await fetchReservations(token);
+          console.log("fetchReservations", allReservationsData);
+          
+          if (Array.isArray(userReservationsData) && Array.isArray(allReservationsData)) {
+            const mappedReservations = await Promise.all(
+              userReservationsData.map(async (res) => {
+                const formattedStartDate = new Date(res.createdAt).toLocaleDateString("es-ES");
+                const formattedEndDate = new Date(res.updatedAt).toLocaleDateString("es-ES");
+
+                // Obtener el nombre de la clase de vuelo
+                const flightClass = await getFlightClassDescription(res.clasevuelo_id, token);
+
+                // Buscar el código de reserva en allReservationsData usando reserva_id
+                const reservationMatch = allReservationsData.find(
+                  (reservation) => reservation.id === res.reserva_id
+                );
+
+                // Asignar `codigoReserva` si hay coincidencia, o "Reserva no disponible" si no la hay
+                const reservationCode = reservationMatch ? reservationMatch.codigoReserva : "Reserva no disponible";
+
+                return {
+                  id: res.id,
+                  code: reservationCode, // Usar `codigoReserva` como `code`
+                  startDate: formattedStartDate || "Fecha no disponible",
+                  endDate: formattedEndDate || "Fecha no disponible",
+                  flightClass: flightClass || "Clase no disponible",
+                };
+              })
+            );
+            setReservations(mappedReservations);
+          } else {
+            console.error("Datos no válidos recibidos:", userReservationsData, allReservationsData);
+          }
+        }
+      } catch (error) {
+        console.error("Error al cargar las reservas:", error);
+      }
+    };
+
+    loadUserData();
   }, []);
 
   const indexOfLastReservation = currentPage * reservationsPerPage;
   const indexOfFirstReservation = indexOfLastReservation - reservationsPerPage;
   const currentReservations = reservations.slice(indexOfFirstReservation, indexOfLastReservation);
-
   const totalPages = Math.ceil(reservations.length / reservationsPerPage);
 
   const paginate = (pageNumber: number) => {
@@ -74,6 +116,7 @@ const ListarReservas: React.FC = () => {
                 <th className="py-2 px-4 text-center">Código de Reserva</th>
                 <th className="py-2 px-4 text-center">Fecha de Inicio</th>
                 <th className="py-2 px-4 text-center">Fecha Final</th>
+                <th className="py-2 px-4 text-center">Clase de Vuelo</th>
               </tr>
             </thead>
             <tbody>
@@ -83,11 +126,12 @@ const ListarReservas: React.FC = () => {
                     <td className="py-2 px-4 text-center text-gray-800 dark:text-white">{reservation.code}</td>
                     <td className="py-2 px-4 text-center text-gray-800 dark:text-white">{reservation.startDate}</td>
                     <td className="py-2 px-4 text-center text-gray-800 dark:text-white">{reservation.endDate}</td>
+                    <td className="py-2 px-4 text-center text-gray-800 dark:text-white">{reservation.flightClass}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={3} className="py-4 px-4 text-center text-gray-500 dark:text-white">
+                  <td colSpan={4} className="py-4 px-4 text-center text-gray-500 dark:text-white">
                     No tienes reservas registradas.
                   </td>
                 </tr>
@@ -96,7 +140,6 @@ const ListarReservas: React.FC = () => {
           </table>
         </div>
 
-        {/* Paginación */}
         <div className="flex justify-center mt-4">
           <button
             onClick={() => paginate(currentPage - 1)}

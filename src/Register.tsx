@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import umgLogo from './images/Login/Avion.png';
 import ofiLogo from './images/Login/Aeropuerto.jpg';
+import { registerUser } from './Service/RegisterService'; // Asegúrate de que la ruta sea correcta
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ const Register: React.FC = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Validaciones con SweetAlert2
@@ -19,6 +20,7 @@ const Register: React.FC = () => {
         icon: "warning",
         title: "Campo Requerido",
         text: "Por favor, ingresa un nombre de usuario.",
+        confirmButtonColor: "#10B981" // Color verde para el botón OK
       });
       return;
     }
@@ -28,6 +30,7 @@ const Register: React.FC = () => {
         icon: "warning",
         title: "Campo Requerido",
         text: "Por favor, ingresa una contraseña.",
+        confirmButtonColor: "#10B981" // Color verde para el botón OK
       });
       return;
     }
@@ -37,6 +40,7 @@ const Register: React.FC = () => {
         icon: "warning",
         title: "Campo Requerido",
         text: "Por favor, confirma tu contraseña.",
+        confirmButtonColor: "#10B981" // Color verde para el botón OK
       });
       return;
     }
@@ -46,18 +50,25 @@ const Register: React.FC = () => {
         icon: "error",
         title: "Error",
         text: "Las contraseñas no coinciden.",
+        confirmButtonColor: "#10B981" // Color verde para el botón OK
       });
       return;
     }
 
-    // Lógica de registro (ej. enviar datos a un backend)
-    Swal.fire({
-      icon: "success",
-      title: "Registro exitoso",
-      text: `Bienvenido, ${username}!`,
-    }).then(() => {
-      navigate("/login"); // Redirige al login después del registro
-    });
+    // Lógica de registro usando RegisterService
+    try {
+      await registerUser(username, password);
+      Swal.fire({
+        icon: "success",
+        title: "Registro exitoso",
+        text: `Bienvenido, ${username}!`,
+        confirmButtonColor: "#10B981" // Color verde para el botón OK
+      }).then(() => {
+        navigate(-1); // Retrocede una página en lugar de redirigir
+      });
+    } catch (error) {
+      console.error("Error al registrar:", error);
+    }
   };
 
   return (

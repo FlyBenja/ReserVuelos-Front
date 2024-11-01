@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
 import Swal from 'sweetalert2';
+import { toggleReservationStatus } from '../../Service/Pasajeros/CambEstatResv';
+import { fetchFlightDataById } from '../../Service/Pasajeros/TraeDatVue';
 
 interface ReservationInfo {
+  id: number;
   code: string;
   passport: string;
   seat: string;
-  flightNumber: string;
   flightClass: string;
+  flightDataId: number; // Representa el ID del dato de vuelo
 }
 
 const InfoReserva: React.FC = () => {
@@ -17,6 +20,26 @@ const InfoReserva: React.FC = () => {
   const reservation = location.state?.reservation as ReservationInfo;
 
   const [reservationStatus, setReservationStatus] = useState('Confirmado');
+  const [flightData, setFlightData] = useState<any>(null); // Para almacenar los datos de vuelo
+
+  useEffect(() => {
+    // Obtener los detalles de vuelo
+    const loadFlightData = async () => {
+      try {
+        const data = await fetchFlightDataById(reservation.flightDataId);
+        setFlightData(data);
+      } catch (error) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al cargar datos de vuelo',
+          text: 'No se pudo cargar la información del vuelo.',
+          confirmButtonColor: '#10B981',
+        });
+      }
+    };
+
+    loadFlightData();
+  }, [reservation.flightDataId]);
 
   const handleCancelReservation = () => {
     Swal.fire({
@@ -27,18 +50,30 @@ const InfoReserva: React.FC = () => {
       confirmButtonColor: '#d33',
       cancelButtonColor: '#3085d6',
       confirmButtonText: 'Sí, cancelar',
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setReservationStatus('Cancelada');
-        Swal.fire({
-          icon: 'success',
-          title: 'Estado Actualizado',
-          text: 'La reservación ha sido marcada como cancelada.',
-          confirmButtonText: 'OK',
-          customClass: {
-            confirmButton: 'swal-confirm-button',
-          },
-        });
+        try {
+          // Llama a la API para actualizar el estado de la reservación
+          await toggleReservationStatus(reservation.flightDataId, false); // Utiliza flightDataId aquí
+          
+          setReservationStatus('Cancelada');
+          Swal.fire({
+            icon: 'success',
+            title: 'Estado Actualizado',
+            text: 'La reservación ha sido marcada como cancelada.',
+            confirmButtonText: 'OK',
+            customClass: {
+              confirmButton: 'swal-confirm-button',
+            },
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudo cancelar la reservación.',
+            confirmButtonColor: '#10B981',
+          });
+        }
       }
     });
   };
@@ -83,7 +118,7 @@ const InfoReserva: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="text-gray-500 font-semibold">Número de Vuelo</h3>
-                    <p className="text-gray-800 dark:text-white font-medium">{reservation.flightNumber}</p>
+                    <p className="text-gray-800 dark:text-white font-medium">{flightData?.numero_vuelo || 'Cargando...'}</p>
                   </div>
                   <div>
                     <h3 className="text-gray-500 font-semibold">Clase de Vuelo</h3>

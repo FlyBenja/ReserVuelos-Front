@@ -1,15 +1,17 @@
 import { useNavigate, Link } from "react-router-dom";
 import { FaUser, FaLock } from "react-icons/fa";
-import Swal from "sweetalert2"; // Importa SweetAlert2
+import Swal from "sweetalert2";
+// @ts-ignore
+import { login } from './Service/LoginService.js'; // Importando función de login
+// @ts-ignore
+import { getUserProfile } from './Service/getUserProfile.js'; // Importando función de perfil de usuario
 import umgLogo from './images/Login/Avion.png';
 import ofiLogo from './images/Login/Aeropuerto.jpg';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
 
-  const role: number = 2; // Cambia este valor a 1 para simular el rol de Admin
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     // Obtener los valores de los campos
@@ -22,6 +24,7 @@ const Login: React.FC = () => {
         icon: "warning",
         title: "Campo Requerido",
         text: "Por favor, ingresa tu usuario.",
+        confirmButtonColor: "#10B981" // Color verde de TailAdmin
       });
       return;
     }
@@ -31,28 +34,47 @@ const Login: React.FC = () => {
         icon: "warning",
         title: "Campo Requerido",
         text: "Por favor, ingresa tu contraseña.",
+        confirmButtonColor: "#10B981" // Color verde de TailAdmin
       });
       return;
     }
 
-    // Simulación de autenticación basada en el rol
-    if (role === 1) {
+    try {
+      // Llama a la función login de LoginService.js
+      const token = await login(username, password);
+      localStorage.setItem('token', token); // Guarda el token en el localStorage
+
+      // Obtiene el perfil de usuario para conocer el rol
+      const profile = await getUserProfile(token);
+      const role = profile.roleId;
+
+      // Redirige según el rol obtenido
       Swal.fire({
         icon: "success",
         title: "Inicio de Sesión Exitoso",
-        text: "Bienvenido, Admin.",
-      }).then(() => navigate("/admin/roles"));
-    } else if (role === 2) {
-      Swal.fire({
-        icon: "success",
-        title: "Inicio de Sesión Exitoso",
-        text: "Bienvenido, Secretario.",
-      }).then(() => navigate("/pasajeros/reservas"));
-    } else {
+        text: `Bienvenido, ${profile.username}.`,
+        confirmButtonColor: "#10B981" // Color verde de TailAdmin
+      }).then(() => {
+        if (role === 1) {
+          navigate("/admin/roles");
+        } else if (role === 2) {
+          navigate("/pasajeros/reservas");
+        } else {
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Rol no reconocido.",
+            confirmButtonColor: "#10B981" // Color verde de TailAdmin
+          });
+        }
+      });
+    } catch (error: any) {
+      const errorMessage = typeof error === 'string' ? error : "Error de autenticación";
       Swal.fire({
         icon: "error",
         title: "Error de Autenticación",
-        text: "Usuario o contraseña incorrectos.",
+        text: errorMessage,
+        confirmButtonColor: "#10B981" // Color verde de TailAdmin
       });
     }
   };
@@ -105,4 +127,3 @@ const Login: React.FC = () => {
 };
 
 export default Login;
-  

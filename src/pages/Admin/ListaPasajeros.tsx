@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Breadcrumb from '../../components/Breadcrumbs/Breadcrumb';
+import { fetchUserReservationData } from '../../Service/Admin/TraeUserReser';
+import { fetchAllUsers } from '../../Service/Admin/NomUser';
 
 interface Passenger {
   id: number;
-  name: string;
-  seat: string;
+  nombre: string;
+  pasaporte: string;
+  asiento: string;
+  id_user: number;
   profilePhoto: string;
+  reservationCode: string;
+  numero_vuelo: string;
+  clasevuelo_id: string;
+  status: string;
 }
 
 const Pasajeros: React.FC = () => {
@@ -18,44 +26,47 @@ const Pasajeros: React.FC = () => {
   const [maxPageButtons] = useState(10);
 
   const navigate = useNavigate();
+  const location = useLocation();
+  const { reservationId } = location.state || {};
 
   useEffect(() => {
-    const examplePassengers: Passenger[] = [
-      { id: 1, name: 'Juan Pérez', seat: '12A', profilePhoto: 'https://randomuser.me/api/portraits/men/1.jpg' },
-      { id: 2, name: 'María López', seat: '12B', profilePhoto: 'https://randomuser.me/api/portraits/women/1.jpg' },
-      { id: 3, name: 'Carlos García', seat: '12C', profilePhoto: 'https://randomuser.me/api/portraits/men/2.jpg' },
-      { id: 4, name: 'Ana Méndez', seat: '13A', profilePhoto: 'https://randomuser.me/api/portraits/women/2.jpg' },
-      { id: 5, name: 'Luis Fernández', seat: '13B', profilePhoto: 'https://randomuser.me/api/portraits/men/3.jpg' },
-      { id: 6, name: 'Claudia Ríos', seat: '13C', profilePhoto: 'https://randomuser.me/api/portraits/women/3.jpg' },
-      { id: 7, name: 'Pedro Sánchez', seat: '14A', profilePhoto: 'https://randomuser.me/api/portraits/men/4.jpg' },
-      { id: 8, name: 'Lucía Martínez', seat: '14B', profilePhoto: 'https://randomuser.me/api/portraits/women/4.jpg' },
-      { id: 9, name: 'Jorge Gómez', seat: '14C', profilePhoto: 'https://randomuser.me/api/portraits/men/5.jpg' },
-      { id: 10, name: 'Gabriela Ortiz', seat: '15A', profilePhoto: 'https://randomuser.me/api/portraits/women/5.jpg' },
-      { id: 11, name: 'Manuel Torres', seat: '15B', profilePhoto: 'https://randomuser.me/api/portraits/men/6.jpg' },
-      { id: 12, name: 'Isabel Castillo', seat: '15C', profilePhoto: 'https://randomuser.me/api/portraits/women/6.jpg' },
-      { id: 13, name: 'Fernando Ramos', seat: '16A', profilePhoto: 'https://randomuser.me/api/portraits/men/7.jpg' },
-      { id: 14, name: 'Carmen Vega', seat: '16B', profilePhoto: 'https://randomuser.me/api/portraits/women/7.jpg' },
-      { id: 15, name: 'Raúl Domínguez', seat: '16C', profilePhoto: 'https://randomuser.me/api/portraits/men/8.jpg' },
-      { id: 16, name: 'Laura Herrera', seat: '17A', profilePhoto: 'https://randomuser.me/api/portraits/women/8.jpg' },
-      { id: 17, name: 'Enrique Navarro', seat: '17B', profilePhoto: 'https://randomuser.me/api/portraits/men/9.jpg' },
-      { id: 18, name: 'Marta Cruz', seat: '17C', profilePhoto: 'https://randomuser.me/api/portraits/women/9.jpg' },
-      { id: 19, name: 'Alberto Campos', seat: '18A', profilePhoto: 'https://randomuser.me/api/portraits/men/10.jpg' },
-      { id: 20, name: 'Elena Reyes', seat: '18B', profilePhoto: 'https://randomuser.me/api/portraits/women/10.jpg' },
-      { id: 21, name: 'Víctor Lozano', seat: '18C', profilePhoto: 'https://randomuser.me/api/portraits/men/11.jpg' },
-      { id: 22, name: 'Patricia Salinas', seat: '19A', profilePhoto: 'https://randomuser.me/api/portraits/women/11.jpg' },
-      { id: 23, name: 'Ricardo Peña', seat: '19B', profilePhoto: 'https://randomuser.me/api/portraits/men/12.jpg' },
-      { id: 24, name: 'Rosa Muñoz', seat: '19C', profilePhoto: 'https://randomuser.me/api/portraits/women/12.jpg' },
-      { id: 25, name: 'Andrés Serrano', seat: '20A', profilePhoto: 'https://randomuser.me/api/portraits/men/13.jpg' },
-      { id: 26, name: 'Alejandra León', seat: '20B', profilePhoto: 'https://randomuser.me/api/portraits/women/13.jpg' },
-      { id: 27, name: 'Roberto Aguilar', seat: '20C', profilePhoto: 'https://randomuser.me/api/portraits/men/14.jpg' },
-      { id: 28, name: 'Natalia Correa', seat: '21A', profilePhoto: 'https://randomuser.me/api/portraits/women/14.jpg' },
-      { id: 29, name: 'José Molina', seat: '21B', profilePhoto: 'https://randomuser.me/api/portraits/men/15.jpg' },
-      { id: 30, name: 'Sara Vásquez', seat: '21C', profilePhoto: 'https://randomuser.me/api/portraits/women/15.jpg' },
-    ];
+    const loadPassengers = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (reservationId && token) {
+          const reservationData = await fetchUserReservationData(reservationId);
+          const allUsers = await fetchAllUsers(token);
 
-    setPassengers(examplePassengers);
-    setFilteredPassengers(examplePassengers);
-  }, []);
+          const loadedPassengers = reservationData.map((data: any, index: number) => {
+            const user = allUsers.find((user: any) => user.id === data.user_id);
+            const username = user ? user.username : 'Usuario no encontrado';
+
+            return {
+              id: data.id,
+              nombre: username,
+              pasaporte: data.pasaporte,
+              asiento: data.asiento,
+              id_user: data.user_id,
+              profilePhoto: `https://randomuser.me/api/portraits/${index % 2 === 0 ? 'men' : 'women'}/${index + 1}.jpg`,
+              reservationCode: reservationId,
+              numero_vuelo: data.numero_vuelo,
+              clasevuelo_id: data.clasevuelo_id,
+              status: data.status,
+            };
+          });
+
+          setPassengers(loadedPassengers);
+          setFilteredPassengers(loadedPassengers);
+        } else {
+          console.error("reservationId o token no están disponibles");
+        }
+      } catch (error) {
+        console.error("Error al cargar los datos de pasajeros:", error);
+      }
+    };
+
+    loadPassengers();
+  }, [reservationId]);
 
   const handleSearchName = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchName(e.target.value);
@@ -63,7 +74,7 @@ const Pasajeros: React.FC = () => {
 
   useEffect(() => {
     const filtered = passengers.filter((passenger) =>
-      passenger.name.toLowerCase().includes(searchName.toLowerCase())
+      passenger.nombre.toLowerCase().includes(searchName.toLowerCase())
     );
     setFilteredPassengers(filtered);
   }, [searchName, passengers]);
@@ -100,6 +111,7 @@ const Pasajeros: React.FC = () => {
   };
 
   const handlePassengerClick = (passenger: Passenger) => {
+    console.log("Valor de passenger antes de navegar:", passenger); // Verificación del valor de status
     navigate(`/admin/info-pasajero`, { state: { passenger } });
   };
 
@@ -107,7 +119,6 @@ const Pasajeros: React.FC = () => {
     <>
       <Breadcrumb pageName="Listar Pasajeros" />
 
-      {/* Botón de Regresar */}
       <div className="mb-4">
         <button
           onClick={() => navigate(-1)}
@@ -119,7 +130,6 @@ const Pasajeros: React.FC = () => {
       </div>
 
       <div className="mx-auto max-w-5xl px-1 py-1">
-        {/* Campo de búsqueda por nombre */}
         <div className="mb-4">
           <input
             type="text"
@@ -148,15 +158,10 @@ const Pasajeros: React.FC = () => {
                     onClick={() => handlePassengerClick(passenger)}
                   >
                     <td className="py-2 px-4 text-center">
-                      <img src={passenger.profilePhoto} alt={passenger.name} className="w-10 h-10 rounded-full mx-auto" />
+                      <img src={passenger.profilePhoto} alt={passenger.nombre} className="w-10 h-10 rounded-full mx-auto" />
                     </td>
-                    <td className="py-2 px-4 text-center relative group">
-                      {passenger.name}
-                      <div className="absolute hidden group-hover:block bg-black text-white text-xs rounded-lg px-1 py-1 -top-10 left-[50%] transform -translate-x-1/2 w-40 dark:bg-white dark:text-gray-800">
-                        Ver Información Pasajero
-                      </div>
-                    </td>
-                    <td className="py-2 px-4 text-center">{passenger.seat}</td>
+                    <td className="py-2 px-4 text-center">{passenger.nombre}</td>
+                    <td className="py-2 px-4 text-center">{passenger.asiento}</td>
                   </tr>
                 ))
               ) : (
@@ -170,7 +175,6 @@ const Pasajeros: React.FC = () => {
           </table>
         </div>
 
-        {/* Paginación */}
         <div className="flex justify-center mt-4">
           <button
             onClick={() => paginate(currentPage - 1)}

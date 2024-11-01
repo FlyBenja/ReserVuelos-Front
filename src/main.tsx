@@ -6,7 +6,6 @@ import Login from './Login';
 import Register from './Register';
 import './css/style.css';
 import './css/satoshi.css';
-import 'jsvectormap/dist/css/jsvectormap.css';
 import 'sweetalert2/src/sweetalert2.scss';
 import 'flatpickr/dist/flatpickr.min.css';
 
