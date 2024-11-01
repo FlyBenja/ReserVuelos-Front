@@ -19,15 +19,18 @@ const InfoReserva: React.FC = () => {
   const navigate = useNavigate();
   const reservation = location.state?.reservation as ReservationInfo;
 
-  const [reservationStatus, setReservationStatus] = useState('Confirmado');
+  const [reservationStatus, setReservationStatus] = useState(''); // Estado inicial vacío
   const [flightData, setFlightData] = useState<any>(null); // Para almacenar los datos de vuelo
 
   useEffect(() => {
-    // Obtener los detalles de vuelo
+    // Obtener los detalles de vuelo y estado de la reservación
     const loadFlightData = async () => {
       try {
         const data = await fetchFlightDataById(reservation.flightDataId);
         setFlightData(data);
+        
+        // Actualiza el estado de la reservación basado en el estado obtenido de la API
+        setReservationStatus(data.status ? 'Confirmado' : 'Cancelada');
       } catch (error) {
         Swal.fire({
           icon: 'error',
@@ -54,9 +57,11 @@ const InfoReserva: React.FC = () => {
       if (result.isConfirmed) {
         try {
           // Llama a la API para actualizar el estado de la reservación
-          await toggleReservationStatus(reservation.flightDataId, false); // Utiliza flightDataId aquí
+          await toggleReservationStatus(reservation.flightDataId, false);
           
+          // Actualiza el estado a "Cancelada" después de la confirmación
           setReservationStatus('Cancelada');
+          
           Swal.fire({
             icon: 'success',
             title: 'Estado Actualizado',
