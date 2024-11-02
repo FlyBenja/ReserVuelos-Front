@@ -18,6 +18,7 @@ interface Reservation {
   seat: string;
   flightClass: string;
   isActive: boolean;
+  observaciones: string; // Nuevo campo
 }
 
 const CrearReservación: React.FC = () => {
@@ -30,6 +31,7 @@ const CrearReservación: React.FC = () => {
   const [newSeat, setNewSeat] = useState('');
   const [selectedFlightClass, setSelectedFlightClass] = useState('');
   const [selectedFlightNumber, setSelectedFlightNumber] = useState('');
+  const [newObservaciones, setNewObservaciones] = useState(''); // Estado para observaciones
   const [userId, setUserId] = useState<number | null>(null);
   const navigate = useNavigate();
 
@@ -66,6 +68,7 @@ const CrearReservación: React.FC = () => {
               seat: res.asiento || "No disponible",
               flightClass: flightClassDescription || "Clase no disponible",
               isActive: res.status || false,
+              observaciones: res.observaciones || "Sin observaciones", // Nuevo campo en la reserva
             };
           })
         );
@@ -103,10 +106,11 @@ const CrearReservación: React.FC = () => {
           asiento: newSeat,
           numero_vuelo: selectedFlightNumber,
           status: true,
+          observaciones: newObservaciones, // Incluye observaciones
         };
-  
+
         await saveReservation(token, reservationData);
-  
+
         Swal.fire({
           icon: 'success',
           title: 'Reservación creada',
@@ -114,14 +118,15 @@ const CrearReservación: React.FC = () => {
           timer: 2000,
           showConfirmButton: false,
         });
-  
+
         setSelectedCode('');
         setNewPassport('');
         setNewSeat('');
         setSelectedFlightClass('');
         setSelectedFlightNumber('');
+        setNewObservaciones(''); // Limpia observaciones
         setShowCreateModal(false);
-  
+
         loadData();
       } catch (error) {
         console.error("Error al crear la reservación:", error);
@@ -208,13 +213,13 @@ const CrearReservación: React.FC = () => {
             </div>
             <p className="text-gray-600 dark:text-gray-300 mb-2">Asiento: {reservation.seat}</p>
             <p className="text-gray-600 dark:text-gray-300 mb-2">Clase de Vuelo: {reservation.flightClass}</p>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">Código de Reserva: {reservation.code}</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-2">Código de Reserva: {reservation.code}</p>
+            <p className="text-gray-600 dark:text-gray-300 mb-2">Observaciones: {reservation.observaciones}</p> {/* Muestra observaciones */}
             <p className="text-gray-600 dark:text-gray-300 mb-4">Estado: {reservation.isActive ? 'Activa' : 'Inactiva'}</p>
             <div className="flex justify-between">
               <button
                 onClick={() => toggleReservationStatus(reservation.id, reservation.isActive)}
-                className={`font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105 ${reservation.isActive ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
-                  } text-white`}
+                className={`font-semibold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105 ${reservation.isActive ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'} text-white`}
               >
                 {reservation.isActive ? 'Desactivar' : 'Activar'}
               </button>
@@ -279,6 +284,13 @@ const CrearReservación: React.FC = () => {
               value={newSeat}
               onChange={(e) => setNewSeat(e.target.value)}
               placeholder="Asiento"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <input
+              type="text"
+              value={newObservaciones}
+              onChange={(e) => setNewObservaciones(e.target.value)}
+              placeholder="Observaciones"
               className="w-full p-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
 
